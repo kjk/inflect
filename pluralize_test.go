@@ -1,4 +1,4 @@
-package pluralize
+package inflect
 
 import (
 	"testing"
@@ -636,7 +636,7 @@ func TestPlural(t *testing.T) {
 	for i, test := range allPluralTests {
 		s := test[0]
 		exp := test[1]
-		got := Plural(s)
+		got := ToPlural(s)
 		assert.Equal(t, exp, got, "s: %s, i: %d", s, i)
 	}
 }
@@ -653,7 +653,7 @@ func TestSingular(t *testing.T) {
 	for i, test := range allSingularTests {
 		s := test[1]
 		exp := test[0]
-		got := Singular(s)
+		got := ToSingular(s)
 		assert.Equal(t, exp, got, "s: %s, i: %d", s, i)
 	}
 }
@@ -708,20 +708,22 @@ func TestAutomaticallyConvertSingular(t *testing.T) {
 	}
 }
 
+func TestPrependCount(t *testing.T) {
+	{
+		got := Pluralize("test", 5, true)
+		exp := "5 tests"
+		assert.Equal(t, exp, got)
+	}
+
+	{
+		got := Pluralize("test", 1, true)
+		exp := "1 test"
+		assert.Equal(t, exp, got)
+	}
+}
+
 /*
 describe("pluralize", function () {
-  describe("methods", function () {
-
-  describe("prepend count", function () {
-    it("plural words", function () {
-      expect(pluralize("test", 5, true)).to.equal("5 tests");
-    });
-
-    it("singular words", function () {
-      expect(pluralize("test", 1, true)).to.equal("1 test");
-    });
-  });
-
   describe("adding new rules", function () {
     it("uncountable rules", function () {
       expect(pluralize("paper")).to.equal("papers");

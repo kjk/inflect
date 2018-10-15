@@ -1,4 +1,4 @@
-module github.com/kjk/pluralize
+module github.com/kjk/inflect
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect

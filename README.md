@@ -7,12 +7,11 @@ Usage:
 ```go
 import "github.com/kjk/inflect"
 
-s := inflect.ToPlural("man")
-// s == "men"
+inflect.ToPlural("man") // "men"
 
-s = inflect.ToSingular("men")
-// s == "man"
+inflect.ToSingular("men") // "man"
 
 inflect.IsPlural("cats") // true
+
 inflect.IsSingular("cat") // true
 ```

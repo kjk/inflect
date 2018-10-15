@@ -8,10 +8,14 @@ Usage:
 import "github.com/kjk/inflect"
 
 inflect.ToPlural("man") // "men"
+inflect.ToPlural("men") // "men"
 
 inflect.ToSingular("men") // "man"
+inflect.ToSingular("man") // "man"
 
 inflect.IsPlural("cats") // true
+inflect.IsPlural("cat")  // false
 
-inflect.IsSingular("cat") // true
+inflect.IsSingular("cat")  // true
+inflect.IsSingular("cats") // false
 ```

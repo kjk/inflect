@@ -1,7 +1,7 @@
-`inflect` package is a Go port of https://github.com/blakeembrey/pluralize
+Package `inflect` can pluralize ("cat" => "cats", "man" => "men")
+or singularize ("cats" => "cat", "men" => "man") English language nouns.
 
-It can inflect english nouns i.e. pluralize ("cat" => "cats", "man" => "men")
-or singularize ("cats" => "cat", "men" => "man").
+API docs are [here](https://godoc.org/github.com/kjk/inflect).
 
 Usage:
 ```go
@@ -19,3 +19,5 @@ inflect.IsPlural("cat")  // false
 inflect.IsSingular("cat")  // true
 inflect.IsSingular("cats") // false
 ```
+
+This is a Go port of https://github.com/blakeembrey/pluralize

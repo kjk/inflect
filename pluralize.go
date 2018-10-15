@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 )
 
 type rxRule struct {
@@ -109,6 +111,29 @@ func addSingularRule(rule, replacement string) {
 	singularRules = append(singularRules, r)
 }
 
+// copied from strings.ToUpper
+// returns true if s is uppercase
+func isUpper(s string) bool {
+	isASCII, hasLower := true, false
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if c >= utf8.RuneSelf {
+			isASCII = false
+			break
+		}
+		hasLower = hasLower || (c >= 'a' && c <= 'z')
+	}
+	if isASCII {
+		return !hasLower
+	}
+	for r := range s {
+		if !unicode.IsUpper(rune(r)) {
+			return false
+		}
+	}
+	return true
+}
+
 // Pass in a word token to produce a function that can replicate the case on
 // another word.
 func restoreCase(word string, token string) string {
@@ -118,13 +143,13 @@ func restoreCase(word string, token string) string {
 	}
 
 	// Upper cased words. E.g. "HELLO".
-	if word == strings.ToUpper(word) {
+	if isUpper(word) {
 		return strings.ToUpper(token)
 	}
 
 	// Title cased words. E.g. "Title".
 	prefix := word[:1]
-	if prefix == strings.ToUpper(prefix) {
+	if isUpper(prefix) {
 		return strings.ToUpper(token[:1]) + strings.ToLower(token[1:])
 	}
 
@@ -134,9 +159,6 @@ func restoreCase(word string, token string) string {
 
 /*
 	// Interpolate a regexp string.
-	// * @param  {string} str
-	// * @param  {Array}  args
-	// * @return {string}
 	function interpolate (str, args) {
 	  return str.replace(/\$(\d{1,2})/g, function (match, index) {
 		return args[index] || '';
@@ -157,7 +179,12 @@ func replace(word string, rule rxRule) string {
 			return restoreCase(match, result);
 		  });
 	*/
-	return rule.rx.ReplaceAllString(word, rule.replacement)
+	// TODO: not sure if this covers all possibilities
+	repl := rule.replacement
+	if isUpper(word) {
+		repl = strings.ToUpper(repl)
+	}
+	return rule.rx.ReplaceAllString(word, repl)
 }
 
 // Sanitize a word by passing in the word and sanitization rules.
@@ -201,19 +228,22 @@ func replaceWord(word string, replaceMap map[string]string, keepMap map[string]s
 	return sanitizeWord(token, word, rules)
 }
 
-/*
-	// Check if a word is part of the map.
-	function checkWord (replaceMap, keepMap, rules, bool) {
-	  return function (word) {
-		var token = word.toLowerCase();
+// Check if a word is part of the map.
+func checkWord(word string, replaceMap map[string]string, keepMap map[string]string, rules []rxRule) bool {
+	token := strings.ToLower(word)
 
-		if (keepMap.hasOwnProperty(token)) return true;
-		if (replaceMap.hasOwnProperty(token)) return false;
-
-		return sanitizeWord(token, token, rules) === token;
-	  };
+	if _, ok := keepMap[token]; ok {
+		return true
 	}
 
+	if _, ok := replaceMap[token]; ok {
+		return false
+	}
+
+	return sanitizeWord(token, token, rules) == token
+}
+
+/*
 	// Pluralize or singularize a word based on the passed in count.
 	// @param  {string}  word
 	// @param  {number}  count
@@ -225,13 +255,14 @@ func replaceWord(word string, replaceMap map[string]string, keepMap map[string]s
 
 	  return (inclusive ? count + ' ' : '') + pluralized;
 	}
+*/
 
+// IsPlural retruns true if word is plural
+func IsPlural(word string) bool {
+	return checkWord(word, irregularSingles, irregularPlurals, pluralRules)
+}
 
-	// Check if a word is plural.
-	pluralize.isPlural = checkWord(
-	  irregularSingles, irregularPlurals, pluralRules
-	);
-
+/*
 	// Singularize a word.
 	// @type {Function}
 	pluralize.singular = replaceWord(

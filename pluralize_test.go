@@ -632,15 +632,17 @@ var pluralTests = [][]string{
 func TestBasic(t *testing.T) {
 	for i, test := range basicTests {
 		s := test[0]
-		if s == "CHICKEN" {
-			continue
-		}
 		exp := test[1]
 		got := Plural(s)
 		assert.Equal(t, exp, got, "s: %s, i: %d", s, i)
-		if exp != got {
-			Plural(s)
-		}
+	}
+}
+
+func TestBasicIsPlural(t *testing.T) {
+	for i, test := range basicTests {
+		s := test[1]
+		got := IsPlural(s)
+		assert.True(t, got, "s: %s, i: %d", s, i)
 	}
 }
 

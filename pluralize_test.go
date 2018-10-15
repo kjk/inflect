@@ -671,10 +671,11 @@ func TestAutomaticallyConvertPlural(t *testing.T) {
 		{
 			// Make sure the word stays pluralized.
 			s := test[1]
-			exp := test[1]
+			exp := s
 			got := Pluralize(s, 5, false)
 			assert.Equal(t, exp, got, "s: %s, i: %d", s, i)
 		}
+
 		{
 			// Make sure the word becomes a plural.
 			if test[0] != test[1] {
@@ -687,21 +688,24 @@ func TestAutomaticallyConvertPlural(t *testing.T) {
 }
 
 func TestAutomaticallyConvertSingular(t *testing.T) {
-	/*
-	   	BASIC_TESTS.concat(SINGULAR_TESTS).forEach(function (test) {
-	           // Make sure the word stays singular.
-	           it("1 " + test{0} + " -> " + test{0}, function () {
-	             expect(pluralize(test{0}, 1)).to.equal(test{0});
-	           });
-
-	           // Make sure the word becomes singular.
-	           if (test{0} !== test{1}) {
-	             it("1 " + test{1} + " -> " + test{0}, function () {
-	               expect(pluralize(test{1}, 1)).to.equal(test{0});
-	             });
-	           }
-	         });
-	*/
+	for i, test := range allSingularTests {
+		{
+			// Make sure the word stays singular.
+			s := test[0]
+			exp := s
+			got := Pluralize(s, 1, false)
+			assert.Equal(t, exp, got, "s: %s, i: %d", s, i)
+		}
+		{
+			// Make sure the word becomes singular.
+			if test[0] != test[1] {
+				s := test[0]
+				exp := s
+				got := Pluralize(test[1], 1, false)
+				assert.Equal(t, exp, got, "s: %s, i: %d", s, i)
+			}
+		}
+	}
 }
 
 /*

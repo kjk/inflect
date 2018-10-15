@@ -629,8 +629,11 @@ var pluralTests = [][]string{
 	{"thou", "you"},
 }
 
-func TestBasic(t *testing.T) {
-	for i, test := range basicTests {
+var allPluralTests = append(basicTests, pluralTests...)
+var allSingularTests = append(basicTests, singularTests...)
+
+func TestPlural(t *testing.T) {
+	for i, test := range allPluralTests {
 		s := test[0]
 		exp := test[1]
 		got := Plural(s)
@@ -638,76 +641,72 @@ func TestBasic(t *testing.T) {
 	}
 }
 
-func TestBasicIsPlural(t *testing.T) {
-	for i, test := range basicTests {
+func TestIsPlural(t *testing.T) {
+	for i, test := range allPluralTests {
 		s := test[1]
 		got := IsPlural(s)
 		assert.True(t, got, "s: %s, i: %d", s, i)
 	}
 }
 
+func TestSingular(t *testing.T) {
+	for i, test := range allSingularTests {
+		s := test[1]
+		exp := test[0]
+		got := Singular(s)
+		assert.Equal(t, exp, got, "s: %s, i: %d", s, i)
+	}
+}
+
+func TestIsSingular(t *testing.T) {
+	for i, test := range allSingularTests {
+		s := test[0]
+		got := IsSingular(s)
+		assert.True(t, got, "s: %s, i: %d", s, i)
+	}
+}
+
+func TestAutomaticallyConvertPlural(t *testing.T) {
+	for i, test := range allPluralTests {
+		{
+			// Make sure the word stays pluralized.
+			s := test[1]
+			exp := test[1]
+			got := Pluralize(s, 5, false)
+			assert.Equal(t, exp, got, "s: %s, i: %d", s, i)
+		}
+		{
+			// Make sure the word becomes a plural.
+			if test[0] != test[1] {
+				exp := test[1]
+				got := Pluralize(test[0], 5, false)
+				assert.Equal(t, exp, got, "s: %s, i: %d", test[1], i)
+			}
+		}
+	}
+}
+
+func TestAutomaticallyConvertSingular(t *testing.T) {
+	/*
+	   	BASIC_TESTS.concat(SINGULAR_TESTS).forEach(function (test) {
+	           // Make sure the word stays singular.
+	           it("1 " + test{0} + " -> " + test{0}, function () {
+	             expect(pluralize(test{0}, 1)).to.equal(test{0});
+	           });
+
+	           // Make sure the word becomes singular.
+	           if (test{0} !== test{1}) {
+	             it("1 " + test{1} + " -> " + test{0}, function () {
+	               expect(pluralize(test{1}, 1)).to.equal(test{0});
+	             });
+	           }
+	         });
+	*/
+}
+
 /*
 describe("pluralize", function () {
   describe("methods", function () {
-
-    describe("isPlural", function () {
-      BASIC_TESTS.concat(PLURAL_TESTS).forEach(function (test) {
-        it("isPlural(" + test{1} + ")", function () {
-          expect(pluralize.isPlural(test{1})).to.equal(true);
-        });
-      });
-    });
-
-    describe("singular", function () {
-      BASIC_TESTS.concat(SINGULAR_TESTS).forEach(function (test) {
-        it(test{1} + " -> " + test{0}, function () {
-          expect(pluralize.singular(test{1})).to.equal(test{0});
-        });
-      });
-    });
-
-    describe("isSingular", function () {
-      BASIC_TESTS.concat(SINGULAR_TESTS).forEach(function (test) {
-        it("isSingular(" + test{0} + ")", function () {
-          expect(pluralize.isSingular(test{0})).to.equal(true);
-        });
-      });
-    });
-  });
-
-  describe("automatically convert", function () {
-    describe("plural", function () {
-      BASIC_TESTS.concat(PLURAL_TESTS).forEach(function (test) {
-        // Make sure the word stays pluralized.
-        it("5 " + test{1} + " -> " + test{1}, function () {
-          expect(pluralize(test{1}, 5)).to.equal(test{1});
-        });
-
-        // Make sure the word becomes a plural.
-        if (test{0} !== test{1}) {
-          it("5 " + test{0} + " -> " + test{1}, function () {
-            expect(pluralize(test{0}, 5)).to.equal(test{1});
-          });
-        }
-      });
-    });
-
-    describe("singular", function () {
-      BASIC_TESTS.concat(SINGULAR_TESTS).forEach(function (test) {
-        // Make sure the word stays singular.
-        it("1 " + test{0} + " -> " + test{0}, function () {
-          expect(pluralize(test{0}, 1)).to.equal(test{0});
-        });
-
-        // Make sure the word becomes singular.
-        if (test{0} !== test{1}) {
-          it("1 " + test{1} + " -> " + test{0}, function () {
-            expect(pluralize(test{1}, 1)).to.equal(test{0});
-          });
-        }
-      });
-    });
-  });
 
   describe("prepend count", function () {
     it("plural words", function () {

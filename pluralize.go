@@ -3,6 +3,7 @@ package pluralize
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -26,8 +27,6 @@ var irregularSingles = map[string]string{}
 var uncountables = map[string]string{}
 
 // Add a pluralization rule to the collection.
-// @param {(string|RegExp)} rule
-// @param {string}          replacement
 func addPluralRule(rule string, replacement string) {
 	rx, rxStrGo := sanitizeRule(rule)
 	r := rxRule{
@@ -157,28 +156,8 @@ func restoreCase(word string, token string) string {
 	return strings.ToLower(token)
 }
 
-/*
-	// Interpolate a regexp string.
-	function interpolate (str, args) {
-	  return str.replace(/\$(\d{1,2})/g, function (match, index) {
-		return args[index] || '';
-	  });
-	}
-*/
-
 // Replace a word using a rule.
 func replace(word string, rule rxRule) string {
-	/*
-		  return word.replace(rule[0], function (match, index) {
-			var result = interpolate(rule[1], arguments);
-
-			if (match === '') {
-			  return restoreCase(word[index - 1], result);
-			}
-
-			return restoreCase(match, result);
-		  });
-	*/
 	// TODO: not sure if this covers all possibilities
 	repl := rule.replacement
 	if isUpper(word) {
@@ -243,38 +222,35 @@ func checkWord(word string, replaceMap map[string]string, keepMap map[string]str
 	return sanitizeWord(token, token, rules) == token
 }
 
-/*
-	// Pluralize or singularize a word based on the passed in count.
-	// @param  {string}  word
-	// @param  {number}  count
-	// @param  {boolean} inclusive
-	// @return {string}
-	function pluralize (word, count, inclusive) {
-	  var pluralized = count === 1
-		? pluralize.singular(word) : pluralize.plural(word);
-
-	  return (inclusive ? count + ' ' : '') + pluralized;
+// Pluralize or singularize a word based on the passed in count.
+func Pluralize(word string, count int, inclusive bool) string {
+	var pluralized string
+	if count == 1 {
+		pluralized = Singular(word)
+	} else {
+		pluralized = Plural(word)
 	}
-*/
+
+	if inclusive {
+		return strconv.Itoa(count) + " " + pluralized
+	}
+	return pluralized
+}
 
 // IsPlural retruns true if word is plural
 func IsPlural(word string) bool {
 	return checkWord(word, irregularSingles, irregularPlurals, pluralRules)
 }
 
-/*
-	// Singularize a word.
-	// @type {Function}
-	pluralize.singular = replaceWord(
-	  irregularPlurals, irregularSingles, singularRules
-	);
+// Singular singularizes a word.
+func Singular(word string) string {
+	return replaceWord(word, irregularPlurals, irregularSingles, singularRules)
+}
 
-	// Check if a word is singular.
-	// @type {Function}
-	pluralize.isSingular = checkWord(
-	  irregularPlurals, irregularSingles, singularRules
-	);
-*/
+// IsSingular returns true if a word is singular
+func IsSingular(word string) bool {
+	return checkWord(word, irregularPlurals, irregularSingles, singularRules)
+}
 
 var irregularRules = [][]string{
 	// Pronouns.
@@ -367,7 +343,7 @@ var pluralizationRules = [][]string{
 	{`/(child)(?:ren)?$/i`, `$1ren`},
 	{`/eaux$/i`, `$0`},
 	{`/m[ae]n$/i`, `men`},
-	{`'thou`, `you`},
+	{`thou`, `you`},
 }
 
 func addPluralizationRules() {
